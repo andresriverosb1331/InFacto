@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 
-const Sidebar = () => {
+const Sidebar = ({ setVistaActual }) => {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="sidebar bg-dark d-flex flex-column p-3" style={{minHeight: "100vh", width: 260}}>
-      <a href="/" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+    <nav className="sidebar bg-dark d-flex flex-column p-3" style={{ minHeight: "100vh", width: 260 }}>
+      <a href="#" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
         <span className="fs-4">Planificador</span>
       </a>
       <hr />
@@ -14,7 +14,7 @@ const Sidebar = () => {
           <button
             className="nav-link text-white d-flex align-items-center w-100"
             onClick={() => setOpen(!open)}
-            style={{background: "none", border: "none", padding: 0, textAlign: "left"}}
+            style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}
             aria-expanded={open}
             aria-controls="submenu-planificacion"
           >
@@ -25,10 +25,14 @@ const Sidebar = () => {
           <div className={`collapse${open ? ' show' : ''}`} id="submenu-planificacion">
             <ul className="nav flex-column ps-4">
               <li>
-                <a href="#" className="nav-link text-white ps-0">
+                <button
+                  className="nav-link text-white ps-0"
+                  onClick={() => setVistaActual("planificacionInicial")}
+                  style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}
+                >
                   <i className="bi bi-dot me-2"></i>
-                  Actual
-                </a>
+                  Inicial
+                </button>
               </li>
               <li>
                 <a href="#" className="nav-link text-white ps-0">
@@ -46,13 +50,17 @@ const Sidebar = () => {
           </div>
         </li>
         <li className="nav-item mb-2">
-          <a href="#" className="nav-link text-white d-flex align-items-center w-100" style={{background: "none", border: "none", padding: 0, textAlign: "left"}}>
+          <button
+            onClick={() => setVistaActual("dashboard")}
+            className="nav-link text-white d-flex align-items-center w-100"
+            style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}
+          >
             <span className="me-2"><i className="bi bi-speedometer2"></i></span>
             Dashboard
-          </a>
+          </button>
         </li>
         <li className="nav-item mb-2">
-          <a href="#" className="nav-link text-white d-flex align-items-center w-100" style={{background: "none", border: "none", padding: 0, textAlign: "left"}}>
+          <a href="#" className="nav-link text-white d-flex align-items-center w-100" style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}>
             <span className="me-2"><i className="bi bi-box-arrow-right"></i></span>
             Salir
           </a>

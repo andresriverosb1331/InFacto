@@ -6,6 +6,7 @@ import MachineStatus from "./components/MachineStatus";
 import MachineMetrics from "./components/MachineMetrics";
 import ProductionChart from "./components/ProductionChart";
 import ChartOptions from "./components/ChartOptions";
+import PlanificacionInicial from "./components/PlanificacionInicial"; // 👈 nuevo
 import "./assets/estilos.css";
 
 const machineData = {
@@ -116,6 +117,8 @@ const initialChartData = (machineId, option) => {
 const App = () => {
   const [currentMachine, setCurrentMachine] = useState(1);
   const [selectedOption, setSelectedOption] = useState("rpm");
+  const [vistaActual, setVistaActual] = useState("dashboard"); // 👈 nueva vista
+
   const [chartData, setChartData] = useState(
     initialChartData(1, "rpm")
   );
@@ -143,13 +146,14 @@ const App = () => {
 
   const machine = machineData[currentMachine];
 
-  return (
-    <div className="d-flex">
-      <Sidebar />
-      <div
-        className="flex-grow-1"
-        style={{ background: "var(--primary-bg)", minHeight: "100vh" }}
-      >
+return (
+  <div className="d-flex">
+    <Sidebar setVistaActual={setVistaActual} />
+    <div
+      className="flex-grow-1"
+      style={{ background: "var(--primary-bg)", minHeight: "100vh" }}
+    >
+      {vistaActual === "dashboard" && (
         <div className="main-container">
           <DashboardHeader />
           <MachineSelector
@@ -173,9 +177,12 @@ const App = () => {
             setSelected={setSelectedOption}
           />
         </div>
-      </div>
+      )}
+      {vistaActual === "planificacionInicial" && <PlanificacionInicial />}
     </div>
-  );
+  </div>
+);
+
 };
 
 export default App;
