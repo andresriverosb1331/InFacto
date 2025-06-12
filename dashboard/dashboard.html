@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Monitoreo de Producción</title>
+    
+    <!-- Bootstrap 3.3.7 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Control de Producción</h1>
+            <p class="dashboard-subtitle">Sistema de Monitoreo en Tiempo Real</p>
+        </div>
+
+        <!-- Machine Selector -->
+        <div class="machine-selector">
+            <div class="machine-buttons">
+                <button class="machine-btn active" data-machine="1">Máquina 1</button>
+                <button class="machine-btn" data-machine="2">Máquina 2</button>
+                <button class="machine-btn" data-machine="3">Máquina 3</button>
+                <button class="machine-btn" data-machine="4">Máquina 4</button>
+            </div>
+        </div>
+
+        <!-- Current Machine Display -->
+        <div class="current-machine">
+            <h2 id="currentMachineName">MÁQUINA 1</h2>
+            <div class="machine-status">
+                <span class="status-indicator status-running"></span>
+                <span id="machineStatus">Operando Normalmente</span>
+            </div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="row metrics-row">
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="metric-card metric-rpm">
+                    <div class="metric-icon">
+                        <i class="fa fa-tachometer"></i>
+                    </div>
+                    <div class="metric-value" id="rpmValue">1,250</div>
+                    <div class="metric-label">RPM</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="metric-card metric-uptime">
+                    <div class="metric-icon">
+                        <i class="fa fa-clock-o"></i>
+                    </div>
+                    <div class="metric-value" id="uptimeValue">8.5h</div>
+                    <div class="metric-label">Tiempo Activo</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="metric-card metric-remaining">
+                    <div class="metric-icon">
+                        <i class="fa fa-hourglass-half"></i>
+                    </div>
+                    <div class="metric-value" id="remainingValue">2.3h</div>
+                    <div class="metric-label">Tiempo Restante</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="metric-card metric-downtime">
+                    <div class="metric-icon">
+                        <i class="fa fa-pause-circle"></i>
+                    </div>
+                    <div class="metric-value" id="downtimeValue">0.2h</div>
+                    <div class="metric-label">Tiempo Parado</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-container">
+            <h3 class="chart-title">Gráfico de Producción en Tiempo Real</h3>
+            <canvas id="productionChart"></canvas>
+        </div>
+
+        <!-- Chart Options -->
+        <div class="chart-options">
+            <h4>Opciones de Visualización</h4>
+            <div class="option-buttons">
+                <button class="option-btn active" data-option="rpm">RPM</button>
+                <button class="option-btn" data-option="temperature">Temperatura</button>
+                <button class="option-btn" data-option="pressure">Presión</button>
+                <button class="option-btn" data-option="efficiency">Eficiencia</button>
+                <button class="option-btn" data-option="production">Producción</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Bootstrap 3.3.7 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <!-- JavaScript personalizado -->
+    <script src="script.js"></script>
+</body>
+</html>
