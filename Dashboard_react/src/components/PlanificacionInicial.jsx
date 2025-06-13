@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import PlanificacionGrafico from "./PlanificacionGrafico";
 
+// Definimos colores para cada sevilletera
+const coloresSevilletera = {
+  "S1": "rgba(75, 192, 192, 0.15)", // Verde agua (tono suave)
+  "S2": "rgba(255, 159, 64, 0.15)", // Naranja (tono suave)
+  "S3": "rgba(153, 102, 255, 0.15)", // Púrpura (tono suave)
+};
+
 const PlanificacionInicial = () => {
   const [datos, setDatos] = useState([]);
   const [modoGrafico, setModoGrafico] = useState(false);
@@ -19,7 +26,7 @@ const PlanificacionInicial = () => {
         </h2>
         <button
           onClick={() => setModoGrafico(!modoGrafico)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          className="btn-azul-oscuro"
         >
           {modoGrafico ? "Ver tabla" : "Ver gráfico"}
         </button>
@@ -42,9 +49,15 @@ const PlanificacionInicial = () => {
             </thead>
             <tbody>
               {datos.map((fila, idx) => (
-                <tr key={idx} className="hover:bg-gray-50">
+                <tr 
+                  key={idx} 
+                  className="hover:bg-gray-50"
+                  style={{ 
+                    backgroundColor: coloresSevilletera[fila.id_sevilletera] || 'transparent', 
+                  }}
+                >
                   <td className="border px-2 py-1">{fila.id_pedido}</td>
-                  <td className="border px-2 py-1">{fila.id_sevilletera}</td>
+                  <td className="border px-2 py-1 font-semibold">{fila.id_sevilletera}</td>
                   <td className="border px-2 py-1">{fila.fecha.slice(0, 10)}</td>
                   <td className="border px-2 py-1">{fila.hora}</td>
                   <td className="border px-2 py-1">{fila.unidades_producidas}</td>

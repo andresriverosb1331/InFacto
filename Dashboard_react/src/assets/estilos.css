@@ -387,3 +387,18 @@ body {
     max-width: 100%;
   }
 }
+
+.btn-azul-oscuro {
+  background: #223a5e;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.btn-azul-oscuro:hover,
+.btn-azul-oscuro:focus {
+  background: #1a2c47;
+}
