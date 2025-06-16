@@ -1,0 +1,97 @@
+/* ============================================
+   ESTILOS ADICIONALES PARA TABLA Y BOTÓN CSV
+   ============================================ */
+
+/* Header de la tabla detallada */
+.tabla-detallada-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.tabla-detallada-title {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 1.5em;
+}
+
+/* Botón de descarga CSV */
+.btn-descargar-csv {
+    background: linear-gradient(135deg, var(--accent-green), #229954);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+.btn-descargar-csv:hover {
+    background: linear-gradient(135deg, #229954, #1e8449);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+}
+
+.btn-descargar-csv:active {
+    transform: translateY(0);
+}
+
+/* Clases para las filas de la tabla según sevilletera */
+.tabla-fila-s1 {
+    border-left: 4px solid rgba(75, 192, 192, 0.8);
+}
+
+.tabla-fila-s2 {
+    border-left: 4px solid rgba(255, 159, 64, 0.8);
+}
+
+.tabla-fila-s3 {
+    border-left: 4px solid rgba(153, 102, 255, 0.8);
+}
+
+/* Hover effect para las filas */
+.tabla-detallada tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+}
+
+/* Responsivo para el header de la tabla */
+@media (max-width: 768px) {
+    .tabla-detallada-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .tabla-detallada-title {
+        font-size: 1.3em;
+        margin-bottom: 10px;
+    }
+    
+    .btn-descargar-csv {
+        justify-content: center;
+        width: 100%;
+        padding: 15px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tabla-detallada-title {
+        font-size: 1.1em;
+    }
+    
+    .btn-descargar-csv {
+        font-size: 13px;
+        padding: 12px 16px;
+    }
+}

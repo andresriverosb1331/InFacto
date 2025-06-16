@@ -41,10 +41,14 @@ const Sidebar = ({ setVistaActual }) => {
                 </a>
               </li>
               <li>
-                <a href="#" className="nav-link text-white ps-0">
+                <button
+                  className="nav-link text-white ps-0"
+                  onClick={() => setVistaActual("historial")}
+                  style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}
+                >
                   <i className="bi bi-clock-history me-2"></i>
                   Historial
-                </a>
+                </button>
               </li>
             </ul>
           </div>

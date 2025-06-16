@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import "../assets/planificacion.css";
 import PlanificacionGrafico from "./PlanificacionGrafico";
+import "../assets/csv.css";
 
 // Definimos colores para cada sevilletera
 const coloresSevilletera = {
@@ -11,6 +13,8 @@ const coloresSevilletera = {
 const PlanificacionInicial = () => {
   const [datos, setDatos] = useState([]);
   const [modoGrafico, setModoGrafico] = useState(false);
+  const [lineaProduccion, setLineaProduccion] = useState(1);
+  const [mostrarSelectorLinea, setMostrarSelectorLinea] = useState(false);
 
   useEffect(() => {
     fetch("/planificacion.json")
@@ -18,56 +22,200 @@ const PlanificacionInicial = () => {
       .then((data) => setDatos(data));
   }, []);
 
-  return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">
-          {modoGrafico ? "📊 Gráfico por Sevilletera" : "📋 Planificación Inicial del Día"}
-        </h2>
-        <button
-          onClick={() => setModoGrafico(!modoGrafico)}
-          className="btn-azul-oscuro"
-        >
-          {modoGrafico ? "Ver tabla" : "Ver gráfico"}
-        </button>
-      </div>
+  // Función para descargar CSV
+  const descargarCSV = () => {
+    // Crear headers del CSV
+    const headers = ["Pedido", "Sevilletera", "Fecha", "Hora", "Producidas", "Restantes"];
+    
+    // Convertir datos a formato CSV
+    const csvContent = [
+      headers.join(","), // Header row
+      ...datos.map(fila => [
+        fila.id_pedido,
+        fila.id_sevilletera,
+        fila.fecha.slice(0, 10),
+        fila.hora,
+        fila.unidades_producidas,
+        Math.floor(fila.unidades_restantes)
+      ].join(","))
+    ].join("\n");
 
-      {modoGrafico ? (
-        <PlanificacionGrafico datos={datos} />
-      ) : (
-        <div className="overflow-auto">
-          <table className="w-full border border-gray-300 text-sm text-center">
-            <thead className="bg-gray-100 text-gray-700">
-              <tr>
-                <th className="border px-2 py-1">Pedido</th>
-                <th className="border px-2 py-1">Sevilletera</th>
-                <th className="border px-2 py-1">Fecha</th>
-                <th className="border px-2 py-1">Hora</th>
-                <th className="border px-2 py-1">Producidas</th>
-                <th className="border px-2 py-1">Restantes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {datos.map((fila, idx) => (
-                <tr 
-                  key={idx} 
-                  className="hover:bg-gray-50"
-                  style={{ 
-                    backgroundColor: coloresSevilletera[fila.id_sevilletera] || 'transparent', 
-                  }}
-                >
-                  <td className="border px-2 py-1">{fila.id_pedido}</td>
-                  <td className="border px-2 py-1 font-semibold">{fila.id_sevilletera}</td>
-                  <td className="border px-2 py-1">{fila.fecha.slice(0, 10)}</td>
-                  <td className="border px-2 py-1">{fila.hora}</td>
-                  <td className="border px-2 py-1">{fila.unidades_producidas}</td>
-                  <td className="border px-2 py-1">{Math.floor(fila.unidades_restantes)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    // Crear blob y descargar
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `planificacion_detallada_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Agrupar datos por sevilletera
+  const datosPorSevilletera = datos.reduce((acc, item) => {
+    const sevilletera = item.id_sevilletera;
+    if (!acc[sevilletera]) {
+      acc[sevilletera] = [];
+    }
+    acc[sevilletera].push(item);
+    return acc;
+  }, {});
+
+  const lineasProduccion = [1, 2, 3, 4, 5];
+
+  return (
+    <div className="planificacion-container">
+      <div className="planificacion-wrapper">
+        
+        {/* Header */}
+        <div className="planificacion-header">
+          <h1 className="planificacion-title">
+            📋 Planificación del Día
+          </h1>
+          
+          <div className="linea-produccion-selector">
+            <h2 
+              className={`linea-produccion-title ${mostrarSelectorLinea ? 'active' : ''}`}
+              onMouseEnter={() => setMostrarSelectorLinea(true)}
+              onMouseLeave={() => setMostrarSelectorLinea(false)}
+            >
+              📍 Línea de producción {lineaProduccion}
+              {mostrarSelectorLinea && (
+                <div className="linea-produccion-dropdown">
+                  {lineasProduccion.map(linea => (
+                    <div
+                      key={linea}
+                      onClick={() => setLineaProduccion(linea)}
+                      className={`linea-produccion-option ${linea === lineaProduccion ? 'selected' : ''}`}
+                    >
+                      Línea de producción {linea}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </h2>
+          </div>
+
+          <div>
+            <button
+              onClick={() => setModoGrafico(!modoGrafico)}
+              className="toggle-grafico-btn"
+            >
+              {modoGrafico ? "📋 Ver tabla" : "📊 Ver gráfico"}
+            </button>
+          </div>
         </div>
-      )}
+
+        {modoGrafico ? (
+          <PlanificacionGrafico datos={datos} />
+        ) : (
+          <div>
+            {/* Contenedores de Sevilleteras */}
+            <div className="sevilleteras-container">
+              {['S1', 'S2', 'S3'].map(sevilletera => (
+                <div key={sevilletera} className="sevilletera-card">
+                  {/* Header de la Sevilletera */}
+                  <div className="sevilletera-header">
+                    <h3 className="sevilletera-title">
+                      🏭 Sevilletera {sevilletera.slice(1)}
+                    </h3>
+                  </div>
+
+                  {/* Contenido de la Sevilletera */}
+                  <div className="sevilletera-content">
+                    {datosPorSevilletera[sevilletera] && datosPorSevilletera[sevilletera].length > 0 ? (
+                      <div className="pedidos-container">
+                        {datosPorSevilletera[sevilletera].map((item, idx) => (
+                          <div key={idx} className={`pedido-card ${sevilletera.toLowerCase()}`}>
+                            <div className="pedido-header">
+                              <span className="pedido-id">
+                                📦 Pedido {item.id_pedido}
+                              </span>
+                              <span className="pedido-fecha">
+                                {item.fecha.slice(0, 10)}
+                              </span>
+                            </div>
+                            
+                            <div className="pedido-stats">
+                              <span className="pedido-producidas">
+                                ✅ Producidas: {item.unidades_producidas}
+                              </span>
+                              <span className="pedido-restantes">
+                                ⏳ Restantes: {Math.floor(item.unidades_restantes)}
+                              </span>
+                            </div>
+                            
+                            <div className="pedido-hora">
+                              🕐 {item.hora}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="sevilletera-vacia">
+                        <div className="sevilletera-vacia-icon">
+                          📭
+                        </div>
+                        <div>Sin pedidos programados</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tabla completa */}
+            <div className="tabla-detallada-container">
+              <div className="tabla-detallada-header">
+                <h3 className="tabla-detallada-title">
+                  📋 Vista Detallada Completa
+                </h3>
+                <button 
+                  onClick={descargarCSV}
+                  className="btn-descargar-csv"
+                  title="Descargar tabla como CSV"
+                >
+                  📥 Descargar CSV
+                </button>
+              </div>
+              
+              <div className="tabla-scroll">
+                <table className="tabla-detallada">
+                  <thead>
+                    <tr>
+                      <th>Pedido</th>
+                      <th>Sevilletera</th>
+                      <th>Fecha</th>
+                      <th>Hora</th>
+                      <th>Producidas</th>
+                      <th>Restantes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {datos.map((fila, idx) => (
+                      <tr 
+                        key={idx} 
+                        className={`tabla-fila-${fila.id_sevilletera.toLowerCase()}`}
+                        style={{
+                          backgroundColor: coloresSevilletera[fila.id_sevilletera] || 'transparent'
+                        }}
+                      >
+                        <td>{fila.id_pedido}</td>
+                        <td className="tabla-sevilletera">{fila.id_sevilletera}</td>
+                        <td>{fila.fecha.slice(0, 10)}</td>
+                        <td>{fila.hora}</td>
+                        <td className="tabla-producidas">{fila.unidades_producidas}</td>
+                        <td className="tabla-restantes">{Math.floor(fila.unidades_restantes)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -6,7 +6,8 @@ import MachineStatus from "./components/MachineStatus";
 import MachineMetrics from "./components/MachineMetrics";
 import ProductionChart from "./components/ProductionChart";
 import ChartOptions from "./components/ChartOptions";
-import PlanificacionInicial from "./components/PlanificacionInicial"; // 👈 nuevo
+import PlanificacionInicial from "./components/PlanificacionInicial";
+import Historial from './components/Historial';
 import "./assets/estilos.css";
 
 const machineData = {
@@ -179,6 +180,7 @@ return (
         </div>
       )}
       {vistaActual === "planificacionInicial" && <PlanificacionInicial />}
+      {vistaActual === "historial" && <Historial />}
     </div>
   </div>
 );
