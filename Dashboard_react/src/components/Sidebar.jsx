@@ -1,105 +1,109 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { Link } from 'react-router-dom';
+import '../assets/Sidebar.css';
+import routes from '../routes';
 
-const Sidebar = ({ setVistaActual }) => {
+const Sidebar = () => {
   const [open, setOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
+  const handleLinkClick = () => {
+    if (!isCollapsed) {
+      toggleCollapse();
+    }
+  };
 
   return (
-    <nav className="sidebar bg-dark d-flex flex-column p-3" style={{ minHeight: "100vh", width: 260 }}>
-      <a href="#" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span className="fs-4">Planificador</span>
-      </a>
-      <hr />
-      <ul className="nav nav-pills flex-column mb-auto">
-        <li className="nav-item mb-2">
-          <button
-            className="nav-link text-white d-flex align-items-center w-100"
-            onClick={() => setOpen(!open)}
-            style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}
-            aria-expanded={open}
-            aria-controls="submenu-planificacion"
-          >
-            <span className="me-2"><i className="bi bi-calendar3"></i></span>
-            Planificación
-            <span className="ms-auto">{open ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}</span>
-          </button>
-          <div className={`collapse${open ? ' show' : ''}`} id="submenu-planificacion">
-            <ul className="nav flex-column ps-4">
-              <li>
-                <button
-                  className="nav-link text-white ps-0"
-                  onClick={() => setVistaActual("planificacionInicial")}
-                  style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}
-                >
-                  <i className="bi bi-dot me-2"></i>
-                  Inicial
-                </button>
-              </li>
-              <li>
-                <a href="#" className="nav-link text-white ps-0">
-                  <i className="bi bi-plus-circle me-2"></i>
-                  Crear
-                </a>
-              </li>
-              <li>
-                <button
-                  className="nav-link text-white ps-0"
-                  onClick={() => setVistaActual("historial")}
-                  style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}
-                >
-                  <i className="bi bi-clock-history me-2"></i>
-                  Historial
-                </button>
-              </li>
-            </ul>
-          </div>
-        </li>
-        <li className="nav-item mb-2">
-          <button
-            onClick={() => setVistaActual("dashboard")}
-            className="nav-link text-white d-flex align-items-center w-100"
-            style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}
-          >
-            <span className="me-2"><i className="bi bi-speedometer2"></i></span>
-            Dashboard
-          </button>
-        </li>
-        <li className="nav-item mb-2">
-          <a href="#" className="nav-link text-white d-flex align-items-center w-100" style={{ background: "none", border: "none", padding: 0, textAlign: "left" }}>
-            <span className="me-2"><i className="bi bi-box-arrow-right"></i></span>
-            Salir
-          </a>
-        </li>
-      </ul>
-      <style>{`
-        .sidebar .nav-link {
-          text-align: left;
-        }
-        .sidebar .nav > .nav-item {
-          margin-left: 0 !important;
-        }
-        .sidebar .nav .nav {
-          margin-left: 0.5rem;
-        }
-        .sidebar .nav-item {
-          margin-bottom: 0.5rem !important;
-        }
-        .sidebar .nav-item:last-child {
-          margin-bottom: 0 !important;
-        }
-        @media (max-width: 991.98px) {
-          .sidebar {
-            width: 100vw !important;
-            min-width: 0 !important;
-            position: fixed;
-            z-index: 1040;
-            height: 100vh;
-            left: 0;
-            top: 0;
-            transition: transform 0.3s ease;
-          }
-        }
-      `}</style>
-    </nav>
+    <>
+      {isCollapsed && (
+        <div className="menu" onClick={toggleCollapse}>
+          <i className="icono-menu bi bi-list"></i>
+        </div>
+      )}
+      <nav className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+        <div className="logo-container">
+          <Link to={routes.home}>
+            <span className="fs-4">Planificador</span>
+          </Link>
+          {!isCollapsed && (
+            <div className="menuX" onClick={toggleCollapse}>
+              <i className="icono-menu bi bi-x-lg"></i>
+            </div>
+          )}
+        </div>
+        <hr />
+        <ul className="nav">
+          <li className="nav-item">
+            <button
+              className="nav-link"
+              onClick={() => setOpen(!open)}
+              aria-expanded={open}
+              aria-controls="submenu-planificacion"
+            >
+              <span className="me-2"><i className="bi bi-calendar3"></i></span>
+              Planificación
+              <span className="ms-auto">{open ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}</span>
+            </button>
+            <div className={`collapse ${open ? 'show' : ''}`} id="submenu-planificacion">
+              <ul className="nav flex-column ps-3">
+                <li>
+                  <Link to={routes.planificacionInicial} className="nav-link text-white ps-3" onClick={handleLinkClick}>
+                    <i className="bi bi-dot me-2"></i>
+                    Actual
+                  </Link>
+                </li>
+                <li>
+                  <Link to="#" className="nav-link text-white ps-3" onClick={handleLinkClick}>
+                    <i className="bi bi-plus-circle me-2"></i>
+                    Crear
+                  </Link>
+                </li>
+                <li>
+                  <Link to={routes.historial} className="nav-link text-white ps-3" onClick={handleLinkClick}>
+                    <i className="bi bi-clock-history me-2"></i>
+                    Historial
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </li>
+          <li className="nav-item mb-2">
+            <Link to="#" className="nav-link text-white d-flex align-items-center w-100" onClick={handleLinkClick}>
+              <span className="me-2"><i className="bi bi-speedometer2"></i></span>
+              Dashboard
+            </Link>
+          </li>
+          <li className="nav-item mb-2">
+            <Link
+              to={routes.cartaGantt}
+              className="nav-link text-white d-flex align-items-center w-100" onClick={handleLinkClick}
+            >
+              <span className="me-2"><i className="bi bi-speedometer2"></i></span>
+              Carta Gantt
+            </Link>
+          </li>
+          <li className="nav-item mb-2">
+            <Link
+              to={routes.control}
+              className="nav-link text-white d-flex align-items-center w-100" onClick={handleLinkClick}
+            >
+              <span className="me-2"><i className="bi bi-speedometer2"></i></span>
+              Control
+            </Link>
+          </li>
+          <li className="nav-item mb-2">
+            <Link to="#" className="nav-link text-white d-flex align-items-center w-100" onClick={handleLinkClick}>
+              <span className="me-2"><i className="bi bi-box-arrow-right"></i></span>
+              Salir
+            </Link>
+          </li>
+        </ul>
+      </nav>
+    </>
   );
 };
 
