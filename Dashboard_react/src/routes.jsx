@@ -6,6 +6,7 @@ const routes = {
   planificacionGrafico: '/planificacion-grafico',
   planificacionInicial: '/planificacion-inicial',
   historial: '/historial',
+  crear: '/crear-planificacion',
 };
 
 export default routes;

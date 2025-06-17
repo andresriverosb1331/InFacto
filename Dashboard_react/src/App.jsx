@@ -5,6 +5,7 @@ import CartaGantt from "./pages/carta_gantt";
 import Control from "./pages/control";
 import PlanificacionInicial from "./pages/PlanificacionInicial";
 import Historial from "./pages/Historial";  
+import CrearPlanificacion from "./pages/crearplanificacion";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
             <Route path="/control" component={Control} />
             <Route path="/planificacion-inicial" component={PlanificacionInicial} />
             <Route path="/historial" component={Historial} />
+            <Route path="/crear-planificacion" component={CrearPlanificacion} />
           </Switch>
         </div>
       </div>

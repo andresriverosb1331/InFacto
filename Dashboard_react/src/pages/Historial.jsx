@@ -2,202 +2,160 @@ import React, { useState, useEffect } from 'react';
 import '../assets/estilos.css';
 import '../assets/planificacion.css';
 import '../assets/csv.css';
-import '../assets/historial.css'; // ✅ nuevo archivo CSS con clases faltantes
+import '../assets/historial.css';
 
 function Historial() {
-  const [documentos] = useState([
-    {
-    },
-  ]);
-
+  const [datos, setDatos] = useState([]);
   const [filtros, setFiltros] = useState({
     fechaDesde: '',
     fechaHasta: '',
-    numeroPedido: '',
-    tipoDocumento: '',
   });
-
   const [filtrados, setFiltrados] = useState([]);
-  const [buscando, setBuscando] = useState(false);
-
-  useEffect(() => {
-    setFiltrados(documentos);
-  }, [documentos]);
-
-  useEffect(() => {
-    if (filtros.numeroPedido.length >= 3 || filtros.numeroPedido.length === 0) {
-      aplicarFiltros();
-    }
-  }, [filtros.numeroPedido]);
-
-  const aplicarFiltros = () => {
-    setBuscando(true);
-    setTimeout(() => {
-      const resultado = documentos.filter((doc) => {
-        const cumpleDesde = !filtros.fechaDesde || doc.fecha >= filtros.fechaDesde;
-        const cumpleHasta = !filtros.fechaHasta || doc.fecha <= filtros.fechaHasta;
-        const cumplePedido = !filtros.numeroPedido || doc.numeroPedido.toLowerCase().includes(filtros.numeroPedido.toLowerCase());
-        const cumpleTipo = !filtros.tipoDocumento || doc.tipo === filtros.tipoDocumento;
-        return cumpleDesde && cumpleHasta && cumplePedido && cumpleTipo;
-      });
-      setFiltrados(resultado);
-      setBuscando(false);
-    }, 800);
+  const [popupDia, setPopupDia] = useState(null);
+  const coloresSevilletera = {
+    "S1": "rgba(75, 192, 192, 0.15)", // Verde agua (tono suave)
+    "S2": "rgba(255, 159, 64, 0.15)", // Naranja (tono suave)
+    "S3": "rgba(153, 102, 255, 0.15)", // Púrpura (tono suave)
   };
+  // Cargar datos del JSON
+  useEffect(() => {
+    fetch('/planificacion.json')
+      .then(res => res.json())
+      .then(data => setDatos(data));
+  }, []);
 
-  const limpiarFiltros = () => {
-    setFiltros({
-      fechaDesde: '',
-      fechaHasta: '',
-      numeroPedido: '',
-      tipoDocumento: '',
-    });
-    setFiltrados(documentos);
-  };
+  // Filtrar por rango de fechas
+  useEffect(() => {
+    let resultado = datos;
+    if (filtros.fechaDesde)
+      resultado = resultado.filter(d => d.fecha.slice(0, 10) >= filtros.fechaDesde);
+    if (filtros.fechaHasta)
+      resultado = resultado.filter(d => d.fecha.slice(0, 10) <= filtros.fechaHasta);
+    setFiltrados(resultado);
+  }, [datos, filtros]);
 
-  const descargarCSV = () => {
-    if (filtrados.length === 0) {
-      alert('No hay documentos para descargar');
-      return;
-    }
+  // Agrupar por fecha
+  const datosPorFecha = filtrados.reduce((acc, item) => {
+    const fecha = item.fecha.slice(0, 10);
+    if (!acc[fecha]) acc[fecha] = [];
+    acc[fecha].push(item);
+    return acc;
+  }, {});
 
-    const headers = ['ID', 'Número de Pedido', 'Fecha', 'Tipo', 'Nombre', 'Estado'];
-    const csv = [
-      headers.join(','),
-      ...filtrados.map((doc) =>
-        [doc.id, doc.numeroPedido, doc.fecha, doc.tipo, `"${doc.nombre}"`, doc.estado].join(',')
-      ),
-    ].join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `documentos_${new Date().toISOString().split('T')[0]}.csv`);
+  // Descargar CSV de un día
+  const descargarCSV = (fecha) => {
+    const headers = ["Pedido", "Sevilletera", "Fecha", "Hora", "Producidas", "Restantes"];
+    const filas = datosPorFecha[fecha].map(fila => [
+      fila.id_pedido,
+      fila.id_sevilletera,
+      fila.fecha.slice(0, 10),
+      fila.hora,
+      fila.unidades_producidas,
+      Math.floor(fila.unidades_restantes)
+    ].join(","));
+    const csvContent = [headers.join(","), ...filas].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `planificacion_${fecha}.csv`;
     link.click();
   };
 
   return (
     <div className="main-container">
       <div className="filtros-header">
-        <h1 className="filtros-title">
-          <i className="fas fa-filter"></i> Filtrado de Documentos
-        </h1>
-        <p className="filtros-subtitle">
-          Busca y descarga documentos por fecha y número de pedido
-        </p>
+        <h1 className="filtros-title">Filtrado de Documentos</h1>
+        <p className="filtros-subtitle">Busca y descarga documentos por fecha</p>
       </div>
 
       <div className="filtros-container">
         <div className="filtros-grid">
           <div className="filtro-grupo">
-            <label className="filtro-label">
-              <i className="fas fa-calendar-alt"></i> Fecha Desde
-            </label>
+            <label className="filtro-label">Fecha Desde</label>
             <input
               type="date"
               className="filtro-input"
               value={filtros.fechaDesde}
-              onChange={(e) => setFiltros({ ...filtros, fechaDesde: e.target.value })}
+              onChange={e => setFiltros({ ...filtros, fechaDesde: e.target.value })}
             />
           </div>
-
           <div className="filtro-grupo">
-            <label className="filtro-label">
-              <i className="fas fa-calendar-check"></i> Fecha Hasta
-            </label>
+            <label className="filtro-label">Fecha Hasta</label>
             <input
               type="date"
               className="filtro-input"
               value={filtros.fechaHasta}
-              onChange={(e) => setFiltros({ ...filtros, fechaHasta: e.target.value })}
+              onChange={e => setFiltros({ ...filtros, fechaHasta: e.target.value })}
             />
           </div>
-
-          <div className="filtro-grupo">
-            <label className="filtro-label">
-              <i className="fas fa-hashtag"></i> Número de Pedido
-            </label>
-            <input
-              type="text"
-              className="filtro-input"
-              placeholder="Ej: PED-2024-001"
-              value={filtros.numeroPedido}
-              onChange={(e) => setFiltros({ ...filtros, numeroPedido: e.target.value })}
-            />
-          </div>
-
-          <div className="filtro-grupo">
-            <label className="filtro-label">
-              <i className="fas fa-file-alt"></i> Tipo de Documento
-            </label>
-            <select
-              className="filtro-input"
-              value={filtros.tipoDocumento}
-              onChange={(e) => setFiltros({ ...filtros, tipoDocumento: e.target.value })}
-            >
-              <option value="">Todos los tipos</option>
-              <option value="factura">Facturas</option>
-              <option value="orden">Órdenes de Producción</option>
-              <option value="reporte">Reportes</option>
-              <option value="planificacion">Planificación</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="filtros-acciones">
-          <button className="btn btn-filtrar" onClick={aplicarFiltros}>
-            <i className="fas fa-search"></i> Buscar Documentos
-          </button>
-          <button className="btn btn-limpiar" onClick={limpiarFiltros}>
-            <i className="fas fa-eraser"></i> Limpiar Filtros
-          </button>
-          <button className="btn btn-descargar" onClick={descargarCSV}>
-            <i className="fas fa-download"></i> Descargar CSV
-          </button>
-        </div>
-      </div>
-
-      <div className="resultados-info">
-        <div className="resultados-contador">
-          <i className="fas fa-file-text"></i>{' '}
-          <span>{filtrados.length}</span> documentos encontrados
-        </div>
-        <div className="resultados-filtros-activos">
-          {Object.entries(filtros)
-            .filter(([_, v]) => v)
-            .map(([k, v]) => (
-              <span key={k} className="filtro-activo">
-                {`${k === 'fechaDesde' ? 'Desde' : k === 'fechaHasta' ? 'Hasta' : k === 'numeroPedido' ? 'Pedido' : 'Tipo'}: ${v}`}
-              </span>
-            ))}
         </div>
       </div>
 
       <div className="documentos-container">
-        {buscando ? (
-          <div className="loading">
-            <div className="spinner"></div>
-            <span>Buscando documentos...</span>
-          </div>
+        {Object.keys(datosPorFecha).length === 0 ? (
+          <div>No hay datos para mostrar</div>
         ) : (
-          <>
-            <div className="placeholder-icon">
-              <i className="fas fa-folder-open"></i>
+          Object.keys(datosPorFecha).sort().map(fecha => (
+            <div key={fecha} className="documento-row" style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ flex: 1, fontWeight: 'bold', fontSize: 18 }}>{fecha}</div>
+              <button
+                style={{ marginRight: 8 }}
+                onClick={() => descargarCSV(fecha)}
+                className="btn btn-descargar"
+              >
+                Descargar
+              </button>
+              <button
+                onClick={() => setPopupDia(fecha)}
+                className="btn btn-ver"
+              >
+                Ver
+              </button>
             </div>
-            <div className="documentos-placeholder">
-              {filtrados.length > 0
-                ? `${filtrados.length} documentos encontrados`
-                : 'No se encontraron documentos'}
-            </div>
-            <div className="placeholder-descripcion">
-              {filtrados.length > 0
-                ? 'Aquí se mostrarían los documentos filtrados. Puedes descargar los resultados en formato CSV.'
-                : 'Prueba ajustando los filtros para encontrar documentos.'}
-            </div>
-          </>
+          ))
         )}
       </div>
+
+      {/* Popup para ver resumen del día */}
+    {popupDia && (
+      <div className="popup-overlay" onClick={() => setPopupDia(null)}>
+        <div className="popup-content" onClick={e => e.stopPropagation()}>
+          <h2>Resumen del día {popupDia}</h2>
+          <div className="tabla-scroll">
+            <table className="tabla-detallada">
+              <thead>
+                <tr>
+                  <th>Pedido</th>
+                  <th>Sevilletera</th>
+                  <th>Fecha</th>
+                  <th>Hora</th>
+                  <th>Producidas</th>
+                  <th>Restantes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {datosPorFecha[popupDia].map((fila, idx) => (
+                  <tr
+                    key={idx}
+                    style={{
+                      backgroundColor: coloresSevilletera[fila.id_sevilletera] || 'transparent'
+                    }}
+                  >
+                    <td>{fila.id_pedido}</td>
+                    <td>{fila.id_sevilletera}</td>
+                    <td>{fila.fecha.slice(0, 10)}</td>
+                    <td>{fila.hora}</td>
+                    <td>{fila.unidades_producidas}</td>
+                    <td>{Math.floor(fila.unidades_restantes)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <button className="btn" onClick={() => setPopupDia(null)} style={{ marginTop: 16 }}>Cerrar</button>
+        </div>
+      </div>
+    )}
     </div>
   );
 }

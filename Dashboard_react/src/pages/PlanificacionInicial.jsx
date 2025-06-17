@@ -164,55 +164,6 @@ const PlanificacionInicial = () => {
                 </div>
               ))}
             </div>
-
-            {/* Tabla completa */}
-            <div className="tabla-detallada-container">
-              <div className="tabla-detallada-header">
-                <h3 className="tabla-detallada-title">
-                  📋 Vista Detallada Completa
-                </h3>
-                <button 
-                  onClick={descargarCSV}
-                  className="btn-descargar-csv"
-                  title="Descargar tabla como CSV"
-                >
-                  📥 Descargar CSV
-                </button>
-              </div>
-              
-              <div className="tabla-scroll">
-                <table className="tabla-detallada">
-                  <thead>
-                    <tr>
-                      <th>Pedido</th>
-                      <th>Sevilletera</th>
-                      <th>Fecha</th>
-                      <th>Hora</th>
-                      <th>Producidas</th>
-                      <th>Restantes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {datos.map((fila, idx) => (
-                      <tr 
-                        key={idx} 
-                        className={`tabla-fila-${fila.id_sevilletera.toLowerCase()}`}
-                        style={{
-                          backgroundColor: coloresSevilletera[fila.id_sevilletera] || 'transparent'
-                        }}
-                      >
-                        <td>{fila.id_pedido}</td>
-                        <td className="tabla-sevilletera">{fila.id_sevilletera}</td>
-                        <td>{fila.fecha.slice(0, 10)}</td>
-                        <td>{fila.hora}</td>
-                        <td className="tabla-producidas">{fila.unidades_producidas}</td>
-                        <td className="tabla-restantes">{Math.floor(fila.unidades_restantes)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
         )}
       </div>
