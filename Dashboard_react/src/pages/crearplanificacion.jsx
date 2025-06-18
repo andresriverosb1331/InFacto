@@ -1,7 +1,43 @@
-import React, { useRef } from "react";
+import React, { useState } from "react";
+import axios from "axios";
 
 const CrearPlanificacion = () => {
-  const fileInputRef = useRef();
+  const [archivo, setArchivo] = useState(null);
+  const [mensaje, setMensaje] = useState("");
+
+  const handleArchivoChange = (e) => {
+    setArchivo(e.target.files[0]);
+  };
+
+  const handleSubir = async () => {
+    if (!archivo) {
+      setMensaje("⚠️ Por favor selecciona un archivo CSV.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", archivo);
+
+    try {
+      setMensaje("⏳ Subiendo y procesando...");
+      const res = await axios.post("http://localhost:5000/upload", formData);
+      setMensaje(`✅ ${res.data.message || "Planificación actualizada correctamente"}`);
+
+      // 🔄 Recargar para mostrar nueva planificación
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
+    } catch (err) {
+      console.error(err);
+      setMensaje("❌ Error al subir o procesar el archivo.");
+    }
+  };
+
+  const handleCancelar = () => {
+    setArchivo(null);
+    setMensaje("");
+  };
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -9,22 +45,21 @@ const CrearPlanificacion = () => {
       <div style={{ margin: "2rem 0" }}>
         <input
           type="file"
-          ref={fileInputRef}
-          style={{ display: "none" }}
+          accept=".csv"
+          onChange={handleArchivoChange}
+          style={{ marginRight: 12 }}
         />
         <button
-          onClick={() => fileInputRef.current && fileInputRef.current.click()}
+          onClick={handleSubir}
           style={{ marginRight: 12 }}
         >
-          Subir archivo
-        </button>
-        <button style={{ marginRight: 12 }}>
           Confirmar archivo
         </button>
-        <button>
+        <button onClick={handleCancelar}>
           Cancelar
         </button>
       </div>
+      <p>{mensaje}</p>
     </div>
   );
 };

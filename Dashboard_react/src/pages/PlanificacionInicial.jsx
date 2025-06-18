@@ -21,16 +21,19 @@ const PlanificacionInicial = () => {
   const [mostrarSelectorLinea, setMostrarSelectorLinea] = useState(false);
   const [datosEmp, setDatosEmp] = useState([]);
 
-  useEffect(() => {
-    fetch("/planificacion.json")
-      .then((res) => res.json())
-      .then((data) => setDatos(data));
-
-    fetch("/planificacion_emp.json")
-      .then((res) => res.json())
-      .then((data) => setDatosEmp(data));
-  }, []);
-
+useEffect(() => {
+  fetch("http://localhost:5000/api/planificacion")
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("No se pudo obtener el JSON");
+      }
+      return res.json();
+    })
+    .then((data) => setDatos(data))
+    .catch((error) => {
+      console.error("Error cargando planificación:", error);
+    });
+}, []);
   // Función para descargar CSV
   const descargarCSV = () => {
     // Crear headers del CSV
