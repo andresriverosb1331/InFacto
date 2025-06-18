@@ -1,0 +1,232 @@
+.filtros-header {
+  background: linear-gradient(135deg, var(--secondary-bg), var(--primary-bg));
+  padding: 25px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.filtros-title {
+  font-size: 2.5em;
+  font-weight: 300;
+  margin: 0 0 10px 0;
+  color: var(--text-light);
+}
+
+.filtros-subtitle {
+  color: var(--text-muted);
+  font-size: 1.1em;
+  margin: 0;
+}
+
+.filtros-container {
+  background: var(--card-bg);
+  padding: 25px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.filtros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.filtro-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filtro-label {
+  color: var(--text-light);
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filtro-input {
+  padding: 12px 16px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: var(--primary-bg);
+  color: var(--text-light);
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.filtro-input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.filtro-input::placeholder {
+  color: var(--text-muted);
+}
+
+.filtros-acciones {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.resultados-info {
+  background: var(--card-bg);
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.resultados-contador {
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.resultados-filtros-activos {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filtro-activo {
+  background: rgba(52, 152, 219, 0.2);
+  color: var(--accent-blue);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  border: 1px solid var(--accent-blue);
+}
+
+.documentos-container {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.documentos-placeholder {
+  color: var(--text-muted);
+  font-size: 1.2em;
+  margin-bottom: 20px;
+}
+
+.placeholder-icon {
+  font-size: 4em;
+  color: var(--accent-blue);
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.placeholder-descripcion {
+  color: var(--text-muted);
+  font-size: 1em;
+  line-height: 1.6;
+  max-width: 600px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--accent-blue);
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(52, 152, 219, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--accent-blue);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filtros-title {
+    font-size: 2em;
+  }
+
+  .filtros-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .filtros-acciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn {
+    justify-content: center;
+    padding: 15px 20px;
+  }
+
+  .resultados-info {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .filtros-title {
+    font-size: 1.6em;
+  }
+
+  .filtros-container {
+    padding: 20px;
+  }
+
+  .documentos-container {
+    padding: 30px 20px;
+  }
+
+  .placeholder-icon {
+    font-size: 3em;
+  }
+
+  .documentos-placeholder {
+    font-size: 1.1em;
+  }
+}
+.popup-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.popup-content {
+  background: #222;
+  padding: 32px;
+  border-radius: 10px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: auto;
+}

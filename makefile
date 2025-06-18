@@ -1,8 +1,8 @@
-CONTAINER_NAME := infacto_contenedor
+CONTAINER_NAME := front-infacto
 
-BUILD_COMMAND := docker build -t infacto-img .
+BUILD_COMMAND := docker build -t front-infacto .
 
-RUN_COMMAND := docker run -d --name $(CONTAINER_NAME) -p 3000:80 infacto-img
+RUN_COMMAND := docker run -d --name $(CONTAINER_NAME) -p 3000:80 front-infacto
 
 REMOVE_COMMAND := docker stop $(CONTAINER_NAME) && docker rm $(CONTAINER_NAME)
 

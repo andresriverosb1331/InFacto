@@ -57,13 +57,13 @@ const Sidebar = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="#" className="nav-link text-white ps-3" onClick={handleLinkClick}>
+                  <Link to={routes.crear} className="nav-link text-white ps-3" onClick={handleLinkClick}>
                     <i className="bi bi-plus-circle me-2"></i>
                     Crear
                   </Link>
                 </li>
                 <li>
-                  <Link to="#" className="nav-link text-white ps-3" onClick={handleLinkClick}>
+                  <Link to={routes.historial} className="nav-link text-white ps-3" onClick={handleLinkClick}>
                     <i className="bi bi-clock-history me-2"></i>
                     Historial
                   </Link>
