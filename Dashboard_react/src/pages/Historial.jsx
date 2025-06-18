@@ -16,23 +16,23 @@ function Historial() {
   const [popupDia, setPopupDia] = useState(null);
   const [popupVista, setPopupVista] = useState("servilleteras");
   const coloresSevilletera = {
-    "S1": "rgba(75, 192, 192, 0.15)", // Verde agua (tono suave)
-    "S2": "rgba(255, 159, 64, 0.15)", // Naranja (tono suave)
-    "S3": "rgba(153, 102, 255, 0.15)", // Púrpura (tono suave)
+    "S1": "rgba(75, 192, 192, 0.15)",
+    "S2": "rgba(255, 159, 64, 0.15)",
+    "S3": "rgba(153, 102, 255, 0.15)",
   };
   const coloresEmpaquetadora = {
     "E1": "rgba(52, 152, 219, 0.15)",
     "E2": "rgba(241, 196, 15, 0.15)",
   };
 
-  // Cargar datos del JSON
+  // Cargar datos desde la API
   useEffect(() => {
-    fetch('/planificacion.json')
+    fetch('http://localhost:5000/api/planificacion')
       .then(res => res.json())
-      .then(data => setDatos(data));
-    fetch('/planificacion_emp.json')
-      .then(res => res.json())
-      .then(data => setDatosEmp(data));
+      .then(data => {
+        setDatos(data.planificacion || []);
+        setDatosEmp(data.planificacion_emp || []);
+      });
   }, []);
 
   // Filtrar por rango de fechas

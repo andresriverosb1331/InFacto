@@ -24,12 +24,14 @@ const PlanificacionInicial = () => {
 useEffect(() => {
   fetch("http://localhost:5000/api/planificacion")
     .then((res) => {
-      if (!res.ok) {
-        throw new Error("No se pudo obtener el JSON");
-      }
+      if (!res.ok) throw new Error("No se pudo obtener el JSON");
       return res.json();
     })
-    .then((data) => setDatos(data))
+    .then((data) => {
+      console.log("Datos recibidos:", data);
+      setDatos(data.planificacion || []);
+      setDatosEmp(data.planificacion_emp || []);
+    })
     .catch((error) => {
       console.error("Error cargando planificación:", error);
     });
