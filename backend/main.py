@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 import subprocess
 import os
 from flask_cors import CORS
+import json
 
 app = Flask(__name__)
 CORS(app)  # Permite solicitudes desde cualquier origen (React incluido)
@@ -9,6 +10,7 @@ CORS(app)  # Permite solicitudes desde cualquier origen (React incluido)
 # Configuraciones
 UPLOAD_FOLDER = "uploads"
 OUTPUT_FILE = "public/planificacion.json"
+OUTPUT_EMP_FILE = "public/planificacion_emp.json"
 SCRIPT_PATH = "scripts/prod.py"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -43,10 +45,24 @@ def upload_csv():
 # 🟢 Ruta para entregar el JSON de planificación
 @app.route("/api/planificacion", methods=["GET"])
 def obtener_planificacion():
+    planificacion = {}
     if os.path.exists(OUTPUT_FILE):
-        return send_from_directory("public", "planificacion.json", mimetype="application/json")
+        with open(OUTPUT_FILE, "r", encoding="utf-8") as f:
+            planificacion = json.load(f)
     else:
-        return jsonify({"error": "Planificación no encontrada"}), 404
+        planificacion = {}
+
+    planificacion_emp = {}
+    if os.path.exists(OUTPUT_EMP_FILE):
+        with open(OUTPUT_EMP_FILE, "r", encoding="utf-8") as f:
+            planificacion_emp = json.load(f)
+    else:
+        planificacion_emp = {}
+
+    # Devuelve ambos archivos en un solo JSON
+    return jsonify(
+        {"planificacion": planificacion, "planificacion_emp": planificacion_emp}
+    )
 
 
 if __name__ == "__main__":

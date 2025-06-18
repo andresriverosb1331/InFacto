@@ -136,13 +136,13 @@ for _, pedido in pedidos.iterrows():
                 break
         fecha_empaquetadora += timedelta(minutes=30)
 
-#print(planificacion)
-df_planificacion_s = pd.DataFrame(planificacion)
-print(df_planificacion_s.head(1000))
-df_planificacion_e = pd.DataFrame(planificacion_emp)
 
-# Mostrar resultados
-print(df_planificacion_e.head(1000))
+#print(planificacion)
+df_planificacion = pd.DataFrame(planificacion)
+print(df_planificacion.head(1000))
+df_planificacion_emp = pd.DataFrame(planificacion_emp)
+
+
 
 # Exportar a archivo JSON
 import os
@@ -150,7 +150,10 @@ import os
 # Obtener ruta absoluta a la carpeta "public"
 ruta_base = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 ruta_salida = os.path.join(ruta_base, "public", "planificacion.json")
+ruta_salida_emp = os.path.join(ruta_base, "public", "planificacion_emp.json")
 
 # Guardar el JSON
-df_planificacion_s.to_json(ruta_salida, orient="records", date_format="iso")
+df_planificacion.to_json(ruta_salida, orient="records", date_format="iso")
+df_planificacion_emp.to_json(ruta_salida_emp, orient="records", date_format="iso")
 print(f"Planificación guardada en {ruta_salida}")
+print(f"Planificación de empaquetadoras guardada en {ruta_salida_emp}")
