@@ -28,7 +28,15 @@ revs_por_unidad = {"A": 2, "B": 3}
 hora_inicio = 7
 hora_fin = 22
 
-fecha_actual = datetime(2025, 5, 5, 7, 0)
+basename = os.path.basename(csv_file)  # Ej: planificacion-05-05-2025.csv
+match = re.search(r"(\d{2}-\d{2}-\d{4})", basename)
+
+if match:
+    fecha_str = match.group(1)  # Ej: "05-05-2025"
+    fecha_actual = datetime.strptime(fecha_str, "%d-%m-%Y") + timedelta(hours=7)
+
+fecha_inicio = pedidos["fecha_limite"].min() - timedelta(days=5)
+print(fecha_actual)
 pedidos["dias_para_entrega"] = (pedidos["fecha_limite"] - fecha_actual).dt.days
 
 def estimar_tiempo_produccion(pedido):
@@ -47,7 +55,7 @@ planificacion = []
 planificacion_emp = []
 ocupacion_diaria = {}
 fecha_servilletera = fecha_actual
-fecha_empaquetadora = datetime(2025, 5, 5, 7, 0)
+fecha_empaquetadora = fecha_servilletera
 
 for _, pedido in pedidos.iterrows():
     cantidad_restante = pedido["cantidad"]
