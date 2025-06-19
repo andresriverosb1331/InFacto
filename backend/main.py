@@ -53,6 +53,7 @@ def upload_csv():
     )
     import shutil
     if result.returncode != 0:
+        print("Error en prod.py:", result.stderr)  # <--- Agrega esto
         return jsonify({"error": "Error al procesar el archivo", "details": result.stderr}), 500
     if os.path.exists(path_empaquetadoras):
         shutil.copy(path_empaquetadoras, os.path.join(OUTPUT_FOLDER, "planificacion_emp.json"))
