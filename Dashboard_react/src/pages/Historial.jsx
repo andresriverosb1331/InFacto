@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "../assets/planificacion.css";
 import "../assets/estilos.css";
+import ResumenExcel from "../components/resumen";
 
 function Historial() {
   const [archivosServ, setArchivosServ] = useState([]);
@@ -42,13 +43,18 @@ function Historial() {
     fetch(`http://localhost:5000/api/historial/${archivo}`)
       .then((res) => res.json())
       .then((data) => {
+        // Filtrar por fecha seleccionada
+        const dataFiltrada = filtroFecha
+          ? data.filter(fila => fila.fecha && fila.fecha.slice(0, 10) === filtroFecha)
+          : data;
+
         const headers = archivo.includes("empaquetadoras")
           ? ["Pedido", "Empaquetadora", "Fecha", "Hora", "Empaquetadas", "Restantes"]
           : ["Pedido", "Sevilletera", "Fecha", "Hora", "Producidas", "Restantes"];
 
         const csv = [
           headers.join(","),
-          ...data.map((fila) => [
+          ...dataFiltrada.map((fila) => [
             fila.id_pedido,
             fila.id_empaquetadora || fila.id_sevilletera,
             fila.fecha?.slice(0, 10),
@@ -75,6 +81,10 @@ function Historial() {
           archivo.includes(filtroFecha.split("-").reverse().join("-"))
         )
       : archivos;
+
+  const contenidoFiltrado = filtroFecha
+    ? contenido.filter(fila => fila.fecha && fila.fecha.slice(0, 10) === filtroFecha)
+    : contenido;
 
   const renderLista = (tipo, archivos) => (
     <div className="sevilletera-card">
@@ -135,7 +145,7 @@ function Historial() {
       {contenido.length > 0 && (
         <>
           <button
-            className="btn"
+            className="btn btn-blanco"
             style={{ margin: "20px 0" }}
             onClick={() => setContenido([])}
           >
@@ -162,8 +172,8 @@ function Historial() {
             }}>
               <h2>Resumen de planificación</h2>
               <div className="tabla-scroll">
-                {/* Tabla de Servilleteras */}
-                {contenido.some(fila => fila.id_sevilletera) && (
+                {/* Filtra por fecha seleccionada */}
+                {contenidoFiltrado.some(fila => fila.id_sevilletera) && (
                   <>
                     <h3 style={{marginTop: 0}}>Servilleteras</h3>
                     <table className="tabla-detallada">
@@ -178,24 +188,22 @@ function Historial() {
                         </tr>
                       </thead>
                       <tbody>
-                        {contenido
-                          .filter(fila => fila.id_sevilletera)
-                          .map((fila, idx) => (
-                            <tr key={idx}>
-                              <td>{fila.id_pedido}</td>
-                              <td>{fila.id_sevilletera}</td>
-                              <td>{fila.fecha?.slice(0, 10)}</td>
-                              <td>{fila.hora}</td>
-                              <td>{fila.unidades_producidas}</td>
-                              <td>{Math.floor(fila.unidades_restantes)}</td>
-                            </tr>
-                          ))}
+                        {contenidoFiltrado.filter(fila => fila.id_sevilletera).map((fila, idx) => (
+                          <tr key={idx}>
+                            <td>{fila.id_pedido}</td>
+                            <td>{fila.id_sevilletera}</td>
+                            <td>{fila.fecha?.slice(0, 10)}</td>
+                            <td>{fila.hora}</td>
+                            <td>{fila.unidades_producidas}</td>
+                            <td>{Math.floor(fila.unidades_restantes)}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </>
                 )}
                 {/* Tabla de Empaquetadoras */}
-                {contenido.some(fila => fila.id_empaquetadora) && (
+                {contenidoFiltrado.some(fila => fila.id_empaquetadora) && (
                   <>
                     <h3 style={{marginTop: 24}}>Empaquetadoras</h3>
                     <table className="tabla-detallada">
@@ -210,30 +218,32 @@ function Historial() {
                         </tr>
                       </thead>
                       <tbody>
-                        {contenido
-                          .filter(fila => fila.id_empaquetadora)
-                          .map((fila, idx) => (
-                            <tr key={idx}>
-                              <td>{fila.id_pedido}</td>
-                              <td>{fila.id_empaquetadora}</td>
-                              <td>{fila.fecha?.slice(0, 10)}</td>
-                              <td>{fila.hora}</td>
-                              <td>{fila.unidades_empaquetadas}</td>
-                              <td>{Math.floor(fila.unidades_restantes)}</td>
-                            </tr>
-                          ))}
+                        {contenidoFiltrado.filter(fila => fila.id_empaquetadora).map((fila, idx) => (
+                          <tr key={idx}>
+                            <td>{fila.id_pedido}</td>
+                            <td>{fila.id_empaquetadora}</td>
+                            <td>{fila.fecha?.slice(0, 10)}</td>
+                            <td>{fila.hora}</td>
+                            <td>{fila.unidades_empaquetadas}</td>
+                            <td>{Math.floor(fila.unidades_restantes)}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </>
                 )}
               </div>
-              <button
-                className="btn"
-                style={{ marginTop: 16 }}
-                onClick={() => setContenido([])}
-              >
-                Cerrar
-              </button>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 24 }}>
+                {contenido.some(fila => fila.id_sevilletera) && (
+                  <ResumenExcel contenido={contenido} className="btn-blanco" />
+                )}
+                <button
+                  className="btn btn-blanco"
+                  onClick={() => setContenido([])}
+                >
+                  Cerrar
+                </button>
+              </div>
             </div>
           </div>
         </>
@@ -265,6 +275,10 @@ function Historial() {
 
         .btn-cargar.activo {
           background-color: #0b79d0;
+        }
+
+        .btn-blanco {
+          color: #fff !important;
         }
       `}</style>
     </div>
