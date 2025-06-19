@@ -72,21 +72,6 @@ const Sidebar = () => {
             </div>
           </li>
           <li className="nav-item mb-2">
-            <Link to="#" className="nav-link text-white d-flex align-items-center w-100" onClick={handleLinkClick}>
-              <span className="me-2"><i className="bi bi-speedometer2"></i></span>
-              Dashboard
-            </Link>
-          </li>
-          <li className="nav-item mb-2">
-            <Link
-              to={routes.cartaGantt}
-              className="nav-link text-white d-flex align-items-center w-100" onClick={handleLinkClick}
-            >
-              <span className="me-2"><i className="bi bi-speedometer2"></i></span>
-              Carta Gantt
-            </Link>
-          </li>
-          <li className="nav-item mb-2">
             <Link
               to={routes.control}
               className="nav-link text-white d-flex align-items-center w-100" onClick={handleLinkClick}

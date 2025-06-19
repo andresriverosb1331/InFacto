@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import "./assets/estilos.css";
 import CartaGantt from "./pages/carta_gantt";
@@ -14,6 +14,9 @@ const App = () => {
         <Sidebar />
         <div className="flex-grow-1" style={{ minHeight: "100vh" }}>
           <Switch>
+            <Route exact path="/">
+              <Redirect to="/planificacion-inicial" />
+            </Route>
             <Route path="/carta-gantt" component={CartaGantt} />
             <Route path="/control" component={Control} />
             <Route path="/planificacion-inicial" component={PlanificacionInicial} />

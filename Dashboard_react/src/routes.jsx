@@ -1,6 +1,6 @@
 
 const routes = {
-  home: '/control',
+  home: '/planificacion-inicial',
   cartaGantt: '/carta-gantt',
   control: '/control',
   planificacionGrafico: '/planificacion-grafico',

@@ -8,10 +8,12 @@ function agruparPorDiaYPedido(contenido) {
   filas.forEach(fila => {
     const fecha = fila.fecha?.slice(0, 10);
     const pedido = fila.id_pedido;
+    const maquina = fila.id_sevilletera || ""; // <-- Corrección aquí
     if (!resumen[fecha]) resumen[fecha] = {};
-    if (!resumen[fecha][pedido]) resumen[fecha][pedido] = { total: 0, restante: 0 };
+    if (!resumen[fecha][pedido]) resumen[fecha][pedido] = { total: 0, restante: 0, maquinas: new Set() };
     resumen[fecha][pedido].total += Number(fila.unidades_producidas || 0);
     resumen[fecha][pedido].restante = Math.floor(fila.unidades_restantes || 0);
+    if (maquina) resumen[fecha][pedido].maquinas.add(maquina);
   });
   return resumen;
 }
@@ -19,7 +21,7 @@ function agruparPorDiaYPedido(contenido) {
 export default function ResumenExcel({ contenido, className }) {
   const handleDescargar = () => {
     const resumen = agruparPorDiaYPedido(contenido);
-    const rows = [["Fecha", "Pedido", "Total Producidas", "Restante"]];
+    const rows = [["Fecha", "Pedido", "Total Producidas", "Restante", "Máquinas"]];
     // Ordenar fechas de menor a mayor
     const fechasOrdenadas = Object.keys(resumen).sort();
     fechasOrdenadas.forEach(fecha => {
@@ -27,7 +29,8 @@ export default function ResumenExcel({ contenido, className }) {
       const pedidosOrdenados = Object.keys(resumen[fecha]).sort();
       pedidosOrdenados.forEach(pedido => {
         const datos = resumen[fecha][pedido];
-        rows.push([fecha, pedido, datos.total, datos.restante]);
+        const maquinas = Array.from(datos.maquinas).join(", ");
+        rows.push([fecha, pedido, datos.total, datos.restante, maquinas]);
       });
     });
 
