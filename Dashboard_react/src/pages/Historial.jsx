@@ -1,259 +1,272 @@
-import React, { useState, useEffect } from 'react';
-import '../assets/estilos.css';
-import '../assets/planificacion.css';
-import '../assets/csv.css';
-import '../assets/historial.css';
-import * as XLSX from "xlsx";
+import { useEffect, useState } from "react";
+import "../assets/planificacion.css";
+import "../assets/estilos.css";
 
 function Historial() {
-  const [datos, setDatos] = useState([]);
-  const [datosEmp, setDatosEmp] = useState([]);
-  const [filtros, setFiltros] = useState({
-    fechaDesde: '',
-    fechaHasta: '',
-  });
-  const [filtrados, setFiltrados] = useState([]);
-  const [popupDia, setPopupDia] = useState(null);
+  const [archivosServ, setArchivosServ] = useState([]);
+  const [archivosEmp, setArchivosEmp] = useState([]);
+  const [seleccionado, setSeleccionado] = useState(null);
+  const [contenido, setContenido] = useState([]);
+  const [filtroFecha, setFiltroFecha] = useState("");
   const [popupVista, setPopupVista] = useState("servilleteras");
-  const coloresSevilletera = {
-    "S1": "rgba(75, 192, 192, 0.15)",
-    "S2": "rgba(255, 159, 64, 0.15)",
-    "S3": "rgba(153, 102, 255, 0.15)",
-  };
-  const coloresEmpaquetadora = {
-    "E1": "rgba(52, 152, 219, 0.15)",
-    "E2": "rgba(241, 196, 15, 0.15)",
-  };
 
-  // Cargar datos desde la API
   useEffect(() => {
-    fetch('http://localhost:5000/api/planificacion')
-      .then(res => res.json())
-      .then(data => {
-        setDatos(data.planificacion || []);
-        setDatosEmp(data.planificacion_emp || []);
-      });
+    fetch("http://localhost:5000/api/historial")
+      .then((res) => res.json())
+      .then((data) => {
+        const serv = data
+          .filter((a) => a.includes("servilleteras"))
+          .sort((a, b) => b.localeCompare(a));
+        const emp = data
+          .filter((a) => a.includes("empaquetadoras"))
+          .sort((a, b) => b.localeCompare(a));
+        setArchivosServ(serv);
+        setArchivosEmp(emp);
+      })
+      .catch((err) => console.error("Error cargando historial:", err));
   }, []);
 
-  // Filtrar por rango de fechas
-  useEffect(() => {
-    let resultado = datos;
-    if (filtros.fechaDesde)
-      resultado = resultado.filter(d => d.fecha.slice(0, 10) >= filtros.fechaDesde);
-    if (filtros.fechaHasta)
-      resultado = resultado.filter(d => d.fecha.slice(0, 10) <= filtros.fechaHasta);
-    setFiltrados(resultado);
-  }, [datos, filtros]);
+  const cargarPlanificacion = (nombreBase) => {
+    const nombreCompleto = `${nombreBase}.json`;
 
-  // Agrupar por fecha
-  const datosPorFecha = filtrados.reduce((acc, item) => {
-    const fecha = item.fecha.slice(0, 10);
-    if (!acc[fecha]) acc[fecha] = [];
-    acc[fecha].push(item);
-    return acc;
-  }, {});
-
-  // Agrupar por fecha para empaquetadoras
-  const datosEmpPorFecha = datosEmp.reduce((acc, item) => {
-    const fecha = item.fecha.slice(0, 10);
-    if (!acc[fecha]) acc[fecha] = [];
-    acc[fecha].push(item);
-    return acc;
-  }, {});
-
-  // Descargar Excel con dos hojas
-  const descargarExcel = (fecha) => {
-    // Servilleteras
-    const headersS = ["Pedido", "Sevilletera", "Fecha", "Hora", "Producidas", "Restantes"];
-    const filasS = (datosPorFecha[fecha] || []).map(fila => [
-      fila.id_pedido,
-      fila.id_sevilletera,
-      fila.fecha.slice(0, 10),
-      fila.hora,
-      fila.unidades_producidas,
-      Math.floor(fila.unidades_restantes)
-    ]);
-    // Empaquetadoras
-    const headersE = ["Pedido", "Empaquetadora", "Fecha", "Hora", "Empaquetadas", "Restantes"];
-    const filasE = (datosEmpPorFecha[fecha] || []).map(fila => [
-      fila.id_pedido,
-      fila.id_empaquetadora,
-      fila.fecha.slice(0, 10),
-      fila.hora,
-      fila.unidades_empaquetadas,
-      Math.floor(fila.unidades_restantes)
-    ]);
-    // Crear libro y hojas
-    const wb = XLSX.utils.book_new();
-    const ws1 = XLSX.utils.aoa_to_sheet([headersS, ...filasS]);
-    XLSX.utils.book_append_sheet(wb, ws1, "Servilleteras");
-    const ws2 = XLSX.utils.aoa_to_sheet([headersE, ...filasE]);
-    XLSX.utils.book_append_sheet(wb, ws2, "Empaquetadoras");
-    XLSX.writeFile(wb, `planificacion_${fecha}.xlsx`);
+    fetch(`http://localhost:5000/api/historial/${nombreCompleto}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setSeleccionado(nombreBase);
+        setContenido(data);
+      })
+      .catch((err) => console.error("Error cargando planificación:", err));
   };
 
+  const descargarComoCSV = (archivo) => {
+    fetch(`http://localhost:5000/api/historial/${archivo}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const headers = archivo.includes("empaquetadoras")
+          ? ["Pedido", "Empaquetadora", "Fecha", "Hora", "Empaquetadas", "Restantes"]
+          : ["Pedido", "Sevilletera", "Fecha", "Hora", "Producidas", "Restantes"];
+
+        const csv = [
+          headers.join(","),
+          ...data.map((fila) => [
+            fila.id_pedido,
+            fila.id_empaquetadora || fila.id_sevilletera,
+            fila.fecha?.slice(0, 10),
+            fila.hora,
+            fila.unidades_empaquetadas || fila.unidades_producidas,
+            Math.floor(fila.unidades_restantes),
+          ].join(",")),
+        ].join("\n");
+
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `${archivo.replace(".json", ".csv")}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      })
+      .catch((err) => console.error("Error exportando CSV:", err));
+  };
+
+  const aplicarFiltro = (archivos) =>
+    filtroFecha
+      ? archivos.filter((archivo) =>
+          archivo.includes(filtroFecha.split("-").reverse().join("-"))
+        )
+      : archivos;
+
+  const renderLista = (tipo, archivos) => (
+    <div className="sevilletera-card">
+      <h3 className="sevilletera-title">
+        📁 Planificaciones de {tipo === "servilleteras" ? "Servilleteras" : "Empaquetadoras"}
+      </h3>
+      <ul className="lista-planificaciones">
+        {archivos.map((archivo) => {
+          const nombre = archivo.replace(".json", "");
+          const fecha = nombre.replace(`planificacion-${tipo}-`, "");
+          return (
+            <li key={archivo} className="item-planificacion">
+              <button
+                className={`btn-cargar ${seleccionado === nombre ? "activo" : ""}`}
+                onClick={() => cargarPlanificacion(nombre)}
+              >
+                📅 {fecha}
+              </button>
+              <button
+                className="btn-descargar"
+                title={`Descargar CSV`}
+                onClick={() => descargarComoCSV(archivo)}
+              >
+                ⬇️
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+
   return (
-    <div className="main-container">
-      <div className="filtros-header">
-        <h1 className="filtros-title">Filtrado de Documentos</h1>
-        <p className="filtros-subtitle">Busca y descarga documentos por fecha</p>
+    <div className="planificacion-container">
+      <h1 className="planificacion-title">🗂️ Historial de Planificaciones</h1>
+
+      <div className="busqueda-fecha">
+        <label>
+          📅 Buscar por fecha:&nbsp;
+          <input
+            type="date"
+            value={filtroFecha}
+            onChange={(e) => setFiltroFecha(e.target.value)}
+          />
+          {filtroFecha && (
+            <button className="btn-limpiar-fecha" onClick={() => setFiltroFecha("")}>
+              ❌ Limpiar
+            </button>
+          )}
+        </label>
       </div>
 
-      <div className="filtros-container">
-        <div className="filtros-grid">
-          <div className="filtro-grupo">
-            <label className="filtro-label">Fecha Desde</label>
-            <input
-              type="date"
-              className="filtro-input"
-              value={filtros.fechaDesde}
-              onChange={e => setFiltros({ ...filtros, fechaDesde: e.target.value })}
-            />
-          </div>
-          <div className="filtro-grupo">
-            <label className="filtro-label">Fecha Hasta</label>
-            <input
-              type="date"
-              className="filtro-input"
-              value={filtros.fechaHasta}
-              onChange={e => setFiltros({ ...filtros, fechaHasta: e.target.value })}
-            />
-          </div>
-        </div>
+      <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
+        {renderLista("servilleteras", aplicarFiltro(archivosServ))}
+        {renderLista("empaquetadoras", aplicarFiltro(archivosEmp))}
       </div>
 
-      <div className="documentos-container">
-        {Object.keys(datosPorFecha).length === 0 ? (
-          <div>No hay datos para mostrar</div>
-        ) : (
-          Object.keys(datosPorFecha).sort().map(fecha => (
-            <div key={fecha} className="documento-row" style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
-              <div style={{ flex: 1, fontWeight: 'bold', fontSize: 18 }}>{fecha}</div>
+      {contenido.length > 0 && (
+        <>
+          <button
+            className="btn"
+            style={{ margin: "20px 0" }}
+            onClick={() => setContenido([])}
+          >
+            Cerrar Detalles
+          </button>
+          <div className="popup-overlay" style={{
+            position: "fixed",
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(0,0,0,0.3)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <div className="popup-content" style={{
+              background: "#232c3b",
+              padding: 32,
+              borderRadius: 12,
+              minWidth: 320,
+              maxWidth: "90vw",
+              maxHeight: "90vh",
+              overflow: "auto",
+              position: "relative"
+            }}>
+              <h2>Resumen de planificación</h2>
+              <div className="tabla-scroll">
+                {/* Tabla de Servilleteras */}
+                {contenido.some(fila => fila.id_sevilletera) && (
+                  <>
+                    <h3 style={{marginTop: 0}}>Servilleteras</h3>
+                    <table className="tabla-detallada">
+                      <thead>
+                        <tr>
+                          <th>Pedido</th>
+                          <th>Sevilletera</th>
+                          <th>Fecha</th>
+                          <th>Hora</th>
+                          <th>Producidas</th>
+                          <th>Restantes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {contenido
+                          .filter(fila => fila.id_sevilletera)
+                          .map((fila, idx) => (
+                            <tr key={idx}>
+                              <td>{fila.id_pedido}</td>
+                              <td>{fila.id_sevilletera}</td>
+                              <td>{fila.fecha?.slice(0, 10)}</td>
+                              <td>{fila.hora}</td>
+                              <td>{fila.unidades_producidas}</td>
+                              <td>{Math.floor(fila.unidades_restantes)}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </>
+                )}
+                {/* Tabla de Empaquetadoras */}
+                {contenido.some(fila => fila.id_empaquetadora) && (
+                  <>
+                    <h3 style={{marginTop: 24}}>Empaquetadoras</h3>
+                    <table className="tabla-detallada">
+                      <thead>
+                        <tr>
+                          <th>Pedido</th>
+                          <th>Empaquetadora</th>
+                          <th>Fecha</th>
+                          <th>Hora</th>
+                          <th>Empaquetadas</th>
+                          <th>Restantes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {contenido
+                          .filter(fila => fila.id_empaquetadora)
+                          .map((fila, idx) => (
+                            <tr key={idx}>
+                              <td>{fila.id_pedido}</td>
+                              <td>{fila.id_empaquetadora}</td>
+                              <td>{fila.fecha?.slice(0, 10)}</td>
+                              <td>{fila.hora}</td>
+                              <td>{fila.unidades_empaquetadas}</td>
+                              <td>{Math.floor(fila.unidades_restantes)}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </>
+                )}
+              </div>
               <button
-                style={{ marginRight: 8 }}
-                onClick={() => descargarExcel(fecha)}
-                className="btn btn-descargar"
+                className="btn"
+                style={{ marginTop: 16 }}
+                onClick={() => setContenido([])}
               >
-                Descargar
-              </button>
-              <button
-                onClick={() => { setPopupDia(fecha); setPopupVista("servilleteras"); }}
-                className="btn btn-ver"
-              >
-                Ver
+                Cerrar
               </button>
             </div>
-          ))
-        )}
-      </div>
-
-      {/* Popup para ver resumen del día */}
-      {popupDia && (
-        <div className="popup-overlay" onClick={() => setPopupDia(null)}>
-          <div className="popup-content" onClick={e => e.stopPropagation()}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-              <button
-                onClick={e => { e.stopPropagation(); setPopupVista("servilleteras"); }}
-                style={{
-                  marginRight: 16,
-                  fontSize: 22,
-                  background: popupVista === "servilleteras" ? "#e0e0e0" : "#fff",
-                  border: "1px solid #bbb",
-                  borderRadius: 6,
-                  padding: "2px 10px",
-                  cursor: "pointer"
-                }}
-                title="Ver Servilleteras"
-              >
-                &#8592;
-              </button>
-              <span style={{ fontWeight: 600, fontSize: 18 }}>
-                {popupVista === "servilleteras" ? "Servilleteras" : "Empaquetadoras"}
-              </span>
-              <button
-                onClick={e => { e.stopPropagation(); setPopupVista("empaquetadoras"); }}
-                style={{
-                  marginLeft: 16,
-                  fontSize: 22,
-                  background: popupVista === "empaquetadoras" ? "#e0e0e0" : "#fff",
-                  border: "1px solid #bbb",
-                  borderRadius: 6,
-                  padding: "2px 10px",
-                  cursor: "pointer"
-                }}
-                title="Ver Empaquetadoras"
-              >
-                &#8594;
-              </button>
-            </div>
-            <h2>Resumen del día {popupDia}</h2>
-            <div className="tabla-scroll">
-              {popupVista === "servilleteras" ? (
-                <table className="tabla-detallada">
-                  <thead>
-                    <tr>
-                      <th>Pedido</th>
-                      <th>Sevilletera</th>
-                      <th>Fecha</th>
-                      <th>Hora</th>
-                      <th>Producidas</th>
-                      <th>Restantes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(datosPorFecha[popupDia] || []).map((fila, idx) => (
-                      <tr
-                        key={idx}
-                        style={{
-                          backgroundColor: coloresSevilletera[fila.id_sevilletera] || 'transparent'
-                        }}
-                      >
-                        <td>{fila.id_pedido}</td>
-                        <td>{fila.id_sevilletera}</td>
-                        <td>{fila.fecha.slice(0, 10)}</td>
-                        <td>{fila.hora}</td>
-                        <td>{fila.unidades_producidas}</td>
-                        <td>{Math.floor(fila.unidades_restantes)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <table className="tabla-detallada">
-                  <thead>
-                    <tr>
-                      <th>Pedido</th>
-                      <th>Empaquetadora</th>
-                      <th>Fecha</th>
-                      <th>Hora</th>
-                      <th>Empaquetadas</th>
-                      <th>Restantes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(datosEmpPorFecha[popupDia] || []).map((fila, idx) => (
-                      <tr
-                        key={idx}
-                        style={{
-                          backgroundColor: coloresEmpaquetadora[fila.id_empaquetadora] || 'transparent'
-                        }}
-                      >
-                        <td>{fila.id_pedido}</td>
-                        <td>{fila.id_empaquetadora}</td>
-                        <td>{fila.fecha.slice(0, 10)}</td>
-                        <td>{fila.hora}</td>
-                        <td>{fila.unidades_empaquetadas}</td>
-                        <td>{Math.floor(fila.unidades_restantes)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-            <button className="btn" onClick={() => setPopupDia(null)} style={{ marginTop: 16 }}>Cerrar</button>
           </div>
-        </div>
+        </>
       )}
+
+      {/* Estilos locales */}
+      <style>{`
+        .item-planificacion {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 8px;
+        }
+
+        .btn-descargar {
+          text-decoration: none;
+          color: white;
+          font-size: 16px;
+          padding: 2px 6px;
+          border-radius: 4px;
+          background-color: #3a3f47;
+          transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn-descargar:hover {
+          background-color: #536079;
+          transform: scale(1.1);
+        }
+
+        .btn-cargar.activo {
+          background-color: #0b79d0;
+        }
+      `}</style>
     </div>
   );
 }

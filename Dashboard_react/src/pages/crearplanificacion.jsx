@@ -23,11 +23,11 @@ const CrearPlanificacion = () => {
       const res = await axios.post("http://localhost:5000/upload", formData);
       setMensaje(`✅ ${res.data.message || "Planificación actualizada correctamente"}`);
 
-      // 🔄 Recargar para mostrar nueva planificación
+      /* 🔄 Recargar para mostrar nueva planificación
       setTimeout(() => {
         window.location.reload();
       }, 1000);
-
+      */
     } catch (err) {
       console.error(err);
       setMensaje("❌ Error al subir o procesar el archivo.");

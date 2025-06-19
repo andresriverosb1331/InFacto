@@ -23,12 +23,9 @@ const PlanificacionInicial = () => {
 
 useEffect(() => {
   fetch("http://localhost:5000/api/planificacion")
-    .then((res) => {
-      if (!res.ok) throw new Error("No se pudo obtener el JSON");
-      return res.json();
-    })
+    .then((res) => res.json())
     .then((data) => {
-      console.log("Datos recibidos:", data);
+      // Si data es un array:
       setDatos(data.planificacion || []);
       setDatosEmp(data.planificacion_emp || []);
     })
